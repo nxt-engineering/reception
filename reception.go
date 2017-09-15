@@ -23,7 +23,12 @@ func main() {
 
 	go runHttpFrontend(hostMap)
 
-	err := docker.Client{}.Launch()
+	runDockerClient(hostMap)
+}
+func runDockerClient(hostMap *common.HostToHostMap) {
+	err := docker.Client{
+		HostMap: hostMap,
+	}.Launch()
 	if err != nil {
 		panic(err)
 	}
