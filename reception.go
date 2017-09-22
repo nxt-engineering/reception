@@ -26,9 +26,10 @@ func main() {
 	runDockerClient(hostMap)
 }
 func runDockerClient(hostMap *common.HostToHostMap) {
-	err := docker.Client{
+	client := docker.Client{
 		HostMap: hostMap,
-	}.Launch()
+	}
+	err := client.Launch()
 	if err != nil {
 		panic(err)
 	}
