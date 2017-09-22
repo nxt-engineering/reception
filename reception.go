@@ -5,7 +5,9 @@ import (
 
 	net_http "net/http"
 
+	miekg_dns "github.com/miekg/dns"
 	"github.com/ninech/reception/common"
+	"github.com/ninech/reception/dns"
 	"github.com/ninech/reception/docker"
 	"github.com/ninech/reception/http"
 )
@@ -22,9 +24,28 @@ func main() {
 	hostMap.Unlock()
 
 	go runHttpFrontend(hostMap)
+	go runDns(hostMap)
 
 	runDockerClient(hostMap)
 }
+
+func runDns(hostMap *common.HostToHostMap) {
+	dnsHandler := dns.Handler{
+		HostMap: hostMap,
+	}
+
+	miekg_dns.HandleFunc("docker.", dnsHandler.ServeDns)
+
+	addr := "localhost:5300"
+	fmt.Printf("Listening on '%v' for DNS requests.\n", addr)
+
+	srv := &miekg_dns.Server{Addr: addr, Net: "udp"}
+	err := srv.ListenAndServe()
+	if err != nil {
+		panic(err)
+	}
+}
+
 func runDockerClient(hostMap *common.HostToHostMap) {
 	client := docker.Client{
 		HostMap: hostMap,
@@ -39,11 +60,11 @@ func runHttpFrontend(hostMap *common.HostToHostMap) {
 	frontend := &net_http.Server{
 		Addr: "localhost:8888",
 		Handler: http.BackendHandler{
-			HostMapping: hostMap,
+			HostMap: hostMap,
 		},
 	}
 
-	fmt.Println("Starting to listen on ", frontend.Addr)
+	fmt.Printf("Listening on '%v' for HTTP traffic.\n", frontend.Addr)
 
 	err := frontend.ListenAndServe()
 	if err != nil {

@@ -15,14 +15,14 @@ import (
 // and relays the exact same response from the backend to the frontend
 type BackendHandler struct {
 	// maps Host (from request header) to destination Host
-	HostMapping *common.HostToHostMap
+	HostMap *common.HostToHostMap
 }
 
 // the http.Handler
-func (h BackendHandler) ServeHTTP(frontendResponseWriter http.ResponseWriter, frontendRequest *http.Request) {
+func (handler BackendHandler) ServeHTTP(frontendResponseWriter http.ResponseWriter, frontendRequest *http.Request) {
 	backendRequest := cloneHttpRequest(frontendRequest)
 
-	lookupAndSetDestinationUrl(h.HostMapping, backendRequest, frontendRequest)
+	lookupAndSetDestinationUrl(handler.HostMap, backendRequest, frontendRequest)
 
 	fmt.Printf("%v -> %v (%v)\n", frontendRequest.Host, backendRequest.URL.Host, frontendRequest.RequestURI)
 
