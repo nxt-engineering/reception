@@ -15,26 +15,25 @@ import (
 func main() {
 	fmt.Println("(c) 2017 Nine Internet Solutions AG")
 
-	hostMap := &common.HostToHostMap{
-		M: make(map[string]string),
+	config := &common.Config{
+		BindAddress:    "localhost:8888",
+		TLD:            "docker.",
+		Projects:       common.NewProjects(),
+		DockerEndpoint: "unix:///var/run/docker.sock",
 	}
 
-	hostMap.Lock()
-	hostMap.M["localhost"] = "google.com:80"
-	hostMap.Unlock()
+	go runHttpFrontend(config)
+	go runDns(config)
 
-	go runHttpFrontend(hostMap)
-	go runDns(hostMap)
-
-	runDockerClient(hostMap)
+	runDockerClient(config)
 }
 
-func runDns(hostMap *common.HostToHostMap) {
-	dnsHandler := dns.Handler{
-		HostMap: hostMap,
+func runDns(config *common.Config) {
+	handler := dns.Handler{
+		Config: config,
 	}
 
-	miekg_dns.HandleFunc("docker.", dnsHandler.ServeDns)
+	miekg_dns.HandleFunc("docker.", handler.ServeDns)
 
 	addr := "localhost:5300"
 	fmt.Printf("Listening on '%v' for DNS requests.\n", addr)
@@ -46,9 +45,9 @@ func runDns(hostMap *common.HostToHostMap) {
 	}
 }
 
-func runDockerClient(hostMap *common.HostToHostMap) {
+func runDockerClient(config *common.Config) {
 	client := docker.Client{
-		HostMap: hostMap,
+		Config: config,
 	}
 	err := client.Launch()
 	if err != nil {
@@ -56,11 +55,11 @@ func runDockerClient(hostMap *common.HostToHostMap) {
 	}
 }
 
-func runHttpFrontend(hostMap *common.HostToHostMap) {
+func runHttpFrontend(config *common.Config) {
 	frontend := &net_http.Server{
-		Addr: "localhost:8888",
+		Addr: config.BindAddress,
 		Handler: http.BackendHandler{
-			HostMap: hostMap,
+			Config: config,
 		},
 	}
 

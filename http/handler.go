@@ -15,20 +15,27 @@ import (
 // and relays the exact same response from the backend to the frontend
 type BackendHandler struct {
 	// maps Host (from request header) to destination Host
-	HostMap *common.HostToHostMap
+	Config *common.Config
 }
 
 // the http.Handler
 func (handler BackendHandler) ServeHTTP(frontendResponseWriter http.ResponseWriter, frontendRequest *http.Request) {
 	backendRequest := cloneHttpRequest(frontendRequest)
 
-	lookupAndSetDestinationUrl(handler.HostMap, backendRequest, frontendRequest)
+	hostMapping := handler.Config.Projects.AllUrls()
+
+	ok := handler.lookupAndSetDestinationUrl(hostMapping, backendRequest, frontendRequest)
+	if !ok {
+		frontendResponseWriter.WriteHeader(http.StatusServiceUnavailable)
+		fmt.Printf("No backend: %v (%v)\n", frontendRequest.Host, frontendRequest.RequestURI)
+		return
+	}
 
 	fmt.Printf("%v -> %v (%v)\n", frontendRequest.Host, backendRequest.URL.Host, frontendRequest.RequestURI)
 
 	backendResponse, err := createHttpClient().Do(backendRequest)
 	if err != nil {
-		frontendResponseWriter.WriteHeader(504)
+		frontendResponseWriter.WriteHeader(http.StatusBadGateway)
 		return
 	}
 	defer backendResponse.Body.Close()
@@ -37,29 +44,42 @@ func (handler BackendHandler) ServeHTTP(frontendResponseWriter http.ResponseWrit
 }
 
 // configures the destination of the backend request according to the given frontend request
-func lookupAndSetDestinationUrl(hostMapping *common.HostToHostMap, backendRequest, frontendRequest *http.Request) {
-	frontendHost := strings.Split(frontendRequest.Host, ":")[0]
+func (handler BackendHandler) lookupAndSetDestinationUrl(hostMapping map[string]string, backendRequest, frontendRequest *http.Request) (ok bool) {
+	frontendHostWithTLD := strings.Split(frontendRequest.Host, ":")[0]
+	frontendHost := removeTLD(frontendHostWithTLD, handler.Config.TLD)
 
-	destinationHost, ok := lookupDestinationHost(hostMapping, frontendHost)
+	destinationHost, ok := hostMapping[frontendHost]
+	if !ok {
+		return
+	}
 
 	destinationUrl := backendRequest.URL
 	destinationUrl.Scheme = "http"
 
-	if ok {
-		destinationUrl.Host = destinationHost
-	} else {
-		destinationUrl.Host = "localhost:8080"
-	}
+	destinationUrl.Host = destinationHost
+	return
 }
 
-// lookup the destination host in the given HostToHostMap
-func lookupDestinationHost(hostMapping *common.HostToHostMap, frontendHost string) (destinationHost string, ok bool) {
-	if hostMapping != nil {
-		hostMapping.RLock()
-		destinationHost, ok = hostMapping.M[frontendHost]
-		hostMapping.RUnlock()
+// removes the TLD from the end of a given hostname:
+// given TLD="docker", then: "a.b.docker" -> "a.b", "a.b.docker." -> "a.b"
+// given TLD="docker.", then: "a.b.docker" -> "a.b", "a.b.docker." -> "a.b"
+func removeTLD(withTLD, TLD string) string {
+	cut := len(TLD)
+
+	if "." != lastChar(TLD) {
+		cut += 1
 	}
-	return
+
+	if "." == lastChar(withTLD) {
+		cut += 1
+	}
+
+	return withTLD[:len(withTLD)-cut]
+}
+
+// returns the last character of a string
+func lastChar(s string) string {
+	return s[len(s)-1:]
 }
 
 // writes an exact copy of a received http.Response to a http.ResponseWriter

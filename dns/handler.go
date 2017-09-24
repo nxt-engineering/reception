@@ -11,13 +11,13 @@ import (
 // returns the appropriate answer for any incoming DNS query
 type Handler struct {
 	// maps Host (from request header) to destination Host
-	HostMap *common.HostToHostMap
+	Config *common.Config
 }
 
 func (handler Handler) ServeDns(response dns.ResponseWriter, request *dns.Msg) {
 	request_domain := request.Question[0].Name
 
-	fmt.Printf("Got a request for '%v'.\n", request_domain)
+	fmt.Printf("Received a DNS request for '%v'.\n", request_domain)
 
 	reply := new(dns.Msg)
 	reply.SetReply(request)
