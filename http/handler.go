@@ -14,6 +14,8 @@ import (
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/html"
 	"github.com/tdewolff/minify/js"
+
+	"github.com/GeertJohan/go.rice"
 )
 
 // for every frontend requests, it connects to the backend server
@@ -60,11 +62,19 @@ func (handler BackendHandler) handleReception(
 	frontendResponseWriter http.ResponseWriter,
 	frontendRequest *http.Request,
 	isFallback bool) {
-	tmpl, err := template.ParseFiles("resources/index.html.tmpl")
+
+	templateBox, err := rice.FindBox("../resources")
 	if err != nil {
 		frontendResponseWriter.WriteHeader(http.StatusInternalServerError)
 		panic(err)
-		return
+	}
+
+	templateString, err := templateBox.String("index.html.tmpl")
+
+	tmpl, err := template.New("index.html").Parse(templateString)
+	if err != nil {
+		frontendResponseWriter.WriteHeader(http.StatusInternalServerError)
+		panic(err)
 	}
 
 	frontendResponseWriter.Header().Set("Content-Type", "text/html; charset=utf-8")
