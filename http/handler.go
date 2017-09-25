@@ -1,6 +1,7 @@
 package http
 
 import (
+	"html/template"
 	"io"
 	"net/http"
 
@@ -9,6 +10,10 @@ import (
 	"fmt"
 
 	"github.com/ninech/reception/common"
+	"github.com/tdewolff/minify"
+	"github.com/tdewolff/minify/css"
+	"github.com/tdewolff/minify/html"
+	"github.com/tdewolff/minify/js"
 )
 
 // for every frontend requests, it connects to the backend server
@@ -20,14 +25,16 @@ type BackendHandler struct {
 
 // the http.Handler
 func (handler BackendHandler) ServeHTTP(frontendResponseWriter http.ResponseWriter, frontendRequest *http.Request) {
+	if handler.isReceptionRequest(frontendRequest) {
+		handler.handleReception(frontendResponseWriter, frontendRequest, false)
+		return
+	}
+
 	backendRequest := cloneHttpRequest(frontendRequest)
-
-	hostMapping := handler.Config.Projects.AllUrls()
-
-	ok := handler.lookupAndSetDestinationUrl(hostMapping, backendRequest, frontendRequest)
+	ok := handler.lookupAndSetDestinationUrl(backendRequest, frontendRequest)
 	if !ok {
-		frontendResponseWriter.WriteHeader(http.StatusServiceUnavailable)
 		fmt.Printf("No backend: %v (%v)\n", frontendRequest.Host, frontendRequest.RequestURI)
+		handler.handleReception(frontendResponseWriter, frontendRequest, true)
 		return
 	}
 
@@ -43,10 +50,62 @@ func (handler BackendHandler) ServeHTTP(frontendResponseWriter http.ResponseWrit
 	copyResponse(&frontendResponseWriter, backendResponse)
 }
 
-// configures the destination of the backend request according to the given frontend request
-func (handler BackendHandler) lookupAndSetDestinationUrl(hostMapping map[string]string, backendRequest, frontendRequest *http.Request) (ok bool) {
+func (handler BackendHandler) isReceptionRequest(frontendRequest *http.Request) bool {
 	frontendHostWithTLD := strings.Split(frontendRequest.Host, ":")[0]
 	frontendHost := removeTLD(frontendHostWithTLD, handler.Config.TLD)
+	return "reception" == frontendHost
+}
+
+func (handler BackendHandler) handleReception(
+	frontendResponseWriter http.ResponseWriter,
+	frontendRequest *http.Request,
+	isFallback bool) {
+	tmpl, err := template.ParseFiles("resources/index.html.tmpl")
+	if err != nil {
+		frontendResponseWriter.WriteHeader(http.StatusInternalServerError)
+		panic(err)
+		return
+	}
+
+	frontendResponseWriter.Header().Set("Content-Type", "text/html; charset=utf-8")
+	frontendResponseWriter.WriteHeader(http.StatusOK)
+
+	tld := handler.Config.TLD
+	if "." == tld[len(tld)-1:] {
+		tld = tld[:len(tld)-1]
+	}
+
+	data := struct {
+		TLD      string
+		Projects map[string]*common.Project
+		NotFound bool
+	}{
+		TLD:      tld,
+		Projects: handler.Config.Projects.M,
+		NotFound: isFallback,
+	}
+
+	m := minify.New()
+	m.AddFunc("text/html", html.Minify)
+	m.AddFunc("text/css", css.Minify)
+	m.AddFunc("text/javascript", js.Minify)
+	minifiedResponseWriter := m.ResponseWriter(frontendResponseWriter, frontendRequest)
+	defer minifiedResponseWriter.Close()
+
+	handler.Config.Projects.RLock()
+	defer handler.Config.Projects.RUnlock()
+	err = tmpl.Execute(minifiedResponseWriter, data)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// configures the destination of the backend request according to the given frontend request
+func (handler BackendHandler) lookupAndSetDestinationUrl(backendRequest, frontendRequest *http.Request) (ok bool) {
+	frontendHostWithTLD := strings.Split(frontendRequest.Host, ":")[0]
+	frontendHost := removeTLD(frontendHostWithTLD, handler.Config.TLD)
+
+	hostMapping := handler.Config.Projects.AllUrls()
 
 	destinationHost, ok := hostMapping[frontendHost]
 	if !ok {
@@ -55,8 +114,8 @@ func (handler BackendHandler) lookupAndSetDestinationUrl(hostMapping map[string]
 
 	destinationUrl := backendRequest.URL
 	destinationUrl.Scheme = "http"
-
 	destinationUrl.Host = destinationHost
+
 	return
 }
 
@@ -64,22 +123,24 @@ func (handler BackendHandler) lookupAndSetDestinationUrl(hostMapping map[string]
 // given TLD="docker", then: "a.b.docker" -> "a.b", "a.b.docker." -> "a.b"
 // given TLD="docker.", then: "a.b.docker" -> "a.b", "a.b.docker." -> "a.b"
 func removeTLD(withTLD, TLD string) string {
-	cut := len(TLD)
+	TLD = normalizeHostname(TLD)
+	withTLD = normalizeHostname(withTLD)
 
-	if "." != lastChar(TLD) {
-		cut += 1
+	if TLD == withTLD {
+		return ""
 	}
 
-	if "." == lastChar(withTLD) {
-		cut += 1
-	}
-
-	return withTLD[:len(withTLD)-cut]
+	return withTLD[:len(withTLD)-len(TLD)-1]
 }
 
-// returns the last character of a string
-func lastChar(s string) string {
-	return s[len(s)-1:]
+func normalizeHostname(hostname string) string {
+	lastChar := hostname[len(hostname)-1:]
+
+	if "." != lastChar {
+		return hostname + "."
+	} else {
+		return hostname
+	}
 }
 
 // writes an exact copy of a received http.Response to a http.ResponseWriter

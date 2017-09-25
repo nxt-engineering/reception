@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+<title>Docker Reception</title>
+
+<style>
+.row {
+  margin-top: 1em;
+  margin-bottom: 2em;
+}
+.card {
+  margin-bottom: 1em;
+}
+.navbar {
+  background-color: #66717E;
+}
+.btn {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+</style>
+
+<div class="container">
+  <nav class="navbar fixed-bottom">
+    <a class="navbar-brand" href="https://github.com/ninech/">
+      by
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIcAAAAeCAMAAAAxUP2zAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAzUExURQAAAACKyQCKyQCKyQCKygCKyQCKyQCIywCLywCKyQCKyQCKyQCKyQCKygCKyQCS1QCY3iHtmvoAAAAPdFJOUwAXrtZ5wYYE/T7pLZpLZW8oCCYAAANUSURBVEjHxZftduQgCIb9iEKMBu//ahfURE0y7ZzdmbP+aHsM6OMrIFXqeSwYkgL1naEXv75jB2olpPAlDFApZ//OIUHthIj6O4LwKZGW99bWliiqb+nxNgfwFe7wnzjgV/+/8apG8IoDugl0Q1Dz9Pll/HlfHuANhtPo5LhtWv4EDa+OVya1fIfrNOjXbqdrMzolqBzzpotPJaOdDdZxTLQVV7/o4lJ+qxRdCDauo5BKbYuxPG2W7YdbW3018odz42B3L5uaVOYpO4YJWQaR3eoplc+0CvKSKanNYP2O8dyQiT0SVbfg4QUIuxYbcXZp0iO2RclJgUAyymQKxnsTkLCA8P6ElYNntpDRRR8dYjY9ozi1KbjISvEf9rnYLIwqvuLMVv7k2MFmsvzBIIqzcMSMXpcQYHhb9Rg4WCxbT5IYdG+CMQaGvbrtTBKeQDyXw7g1ZSLvGA8O73KolWGzIoXiukmYSoLwtKsbTRxIDloCrb3aGz6nPtJADuAeq3JI6lhbjpF3cVhlU7u1D9oi78VTuB95qbbCNnOIREekR2GGukWflgNQU2rA2BDrIofVGmINftl0Oxfd5cJQdu4LuHIxsx6px2Y6KpCt348hB7BwkYOh97k66CM++GL6ojowAk/1B559s1z0xOHGIwa+4qIsmfkWmlLjpuF+VzUJmGMKJ5etKlPdypeMGTlofKILepGLFr0NQy84GYp2dHtFev2YCB0Fzhc72g06HByjttpKuQGJ0tuYFSpHWp+SuXDEsSDyampCe+QY5YbCISeQcjANzO4SHvmMxTuHv3OYnznwmSOk9TLSdgvTj3KsNw7xHKLqxcsSf7qX5TMcvsg0juvrX8rC8m2ONEVayej1uttTSYEPc4CdHhSQwhb7SwwtHelSx+CzelTRzdADcDBcC5uIhrUY9bru4aMc9bCx949+qJC7i7rWTY7UsI7vHB3v3Kc4StVGV2MCEncmLb1ZqUxnJTEv3/1/5mhlrzw1tcUxVpqddFy+Of8Fq9f13AdNHKybojzV06MfHPrCiYN7ovMdKy0fr84tn+mvuM9nnvDPnSGLTesLob48ea5jmVqf3FO79sXXPvk02P0+9MneBQ4M56f+2aAd0EFa7IvR9f/s5Jc/+7U3By/gRR0AAAAASUVORK5CYII="
+           alt="nine.ch">
+    </a>
+  </nav>
+
+  <div class="row">
+    <div class="col">
+      <h1><small class="text-muted">ℹ️</small> Reception</h1>
+    </div>
+  </div>
+  {{ if .NotFound }}
+    <div class="row">
+      <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">✖️</span>
+        </button>
+        <strong>Holy Cow 🐮 !</strong> You should definitely check the url, because we were not able to find the requested container.
+      </div>
+    </div>
+  {{ end }}
+  <div class="row">
+    {{ $tld := .TLD }}
+    {{ range .Projects }}
+      <div class="col-sm-4">
+        <div class="card">
+          {{ if .HasUrl }}
+            {{ $projectFrom := .LocalUrl }}
+            <img class="card-img-top" src="http://{{ $projectFrom }}.{{ $tld }}/favicon.ico">
+          {{ end }}
+          <div class="card-body">
+            <div class="card-title">
+              <h3>{{ .Name }}</h3>
+            </div>
+            {{ if .HasUrl }}
+              <div class="card-subtitle mb-2 text-muted">
+                {{ $projectFrom := .LocalUrl }}
+                <a href="http://{{ $projectFrom }}.{{ $tld }}">{{ $projectFrom }}.{{ $tld }}</a>
+              </div>
+            {{ end }}
+            <div class="card-text">
+              {{ range .Containers.A }}
+                {{ if .HasExposedTCPPorts }}
+                  {{ $containerFrom := .MainLocalUrl }}
+                  {{ if .IsMain }}
+                    <a href="http://{{ $containerFrom }}.{{ $tld }}" target="_blank" class="btn btn-primary">
+                      {{ .Service }}
+                    </a>
+                  {{ else }}
+                    <a href="http://{{ $containerFrom }}.{{ $tld }}" target="_blank" class="btn btn-secondary">
+                      {{ .Service }}
+                    </a>
+                  {{ end }}
+                {{ else }}
+                  {{ if .IsMain }}
+                    <button type="button" class="btn btn-primary" disabled>
+                      {{ .Service }}
+                    </button>
+                  {{ else }}
+                    <button type="button" class="btn btn-secondary" disabled>
+                      {{ .Service }}
+                    </button>
+                  {{ end }}
+                {{ end }}
+              {{ end }}
+            </div>
+          </div>
+        </div>
+      </div>
+    {{ else }}
+      No running docker-compose projects.
+    {{ end }}
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+
+</html>

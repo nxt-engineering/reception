@@ -21,7 +21,7 @@ func (handler Handler) ServeDns(response dns.ResponseWriter, request *dns.Msg) {
 
 	reply := new(dns.Msg)
 	reply.SetReply(request)
-	//reply.Authoritative = false
+	reply.Authoritative = true
 
 	rr4 := new(dns.A)
 	rr4.Hdr = dns.RR_Header{Name: request_domain, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 30}

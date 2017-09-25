@@ -16,10 +16,11 @@ func main() {
 	fmt.Println("(c) 2017 Nine Internet Solutions AG")
 
 	config := &common.Config{
-		BindAddress:    "localhost:8888",
-		TLD:            "docker.",
-		Projects:       common.NewProjects(),
-		DockerEndpoint: "unix:///var/run/docker.sock",
+		HTTPBindAddress: "localhost:80",
+		DNSBindAddress:  "localhost:53",
+		TLD:             "docker.",
+		Projects:        common.NewProjects(),
+		DockerEndpoint:  "unix:///var/run/docker.sock",
 	}
 
 	go runHttpFrontend(config)
@@ -33,9 +34,14 @@ func runDns(config *common.Config) {
 		Config: config,
 	}
 
-	miekg_dns.HandleFunc("docker.", handler.ServeDns)
+	tld := config.TLD
+	if "." != tld[len(tld)-1:] {
+		tld += "."
+	}
 
-	addr := "localhost:5300"
+	miekg_dns.HandleFunc(tld, handler.ServeDns)
+
+	addr := config.DNSBindAddress
 	fmt.Printf("Listening on '%v' for DNS requests.\n", addr)
 
 	srv := &miekg_dns.Server{Addr: addr, Net: "udp"}
@@ -57,7 +63,7 @@ func runDockerClient(config *common.Config) {
 
 func runHttpFrontend(config *common.Config) {
 	frontend := &net_http.Server{
-		Addr: config.BindAddress,
+		Addr: config.HTTPBindAddress,
 		Handler: http.BackendHandler{
 			Config: config,
 		},

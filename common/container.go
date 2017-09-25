@@ -21,6 +21,8 @@ type Container struct {
 // Urls for all exposed ports; does not include the MainUrl
 // Format: $PORT.$CONTAINER.$SERVICE.$PROJECT -> $LOCAL_ADDR:$LOCAL_PORT
 func (container *Container) Urls() (urlMapping map[string]string, err error) {
+	err = nil
+
 	exposedPorts := container.exposedPorts()
 	if len(exposedPorts) == 0 {
 		return urlMapping, NoExposedPorts{container}
@@ -45,6 +47,8 @@ func (container *Container) Urls() (urlMapping map[string]string, err error) {
 // The main URL for this container
 // Format: $CONTAINER.$SERVICE.$PROJECT -> $LOCAL_ADDR:$LOCAL_PORT
 func (container *Container) MainUrl() (from, to string, err error) {
+	err = nil
+
 	httpPort, err := container.MainExposedPort()
 	if err != nil {
 		return
@@ -56,7 +60,13 @@ func (container *Container) MainUrl() (from, to string, err error) {
 	return
 }
 
+func (container *Container) MainLocalUrl() (from string, err error) {
+	from, _, err = container.MainUrl()
+	return from, err
+}
+
 func (container *Container) AllUrls() (urlMapping map[string]string, err error) {
+	err = nil
 	if !container.HasExposedTCPPorts() {
 		return urlMapping, NoExposedPorts{container}
 	}
@@ -70,6 +80,8 @@ func (container *Container) AllUrls() (urlMapping map[string]string, err error) 
 }
 
 func (container *Container) MainExposedPort() (port *Port, err error) {
+	err = nil
+
 	exposedPorts := container.exposedPorts()
 	if len(exposedPorts) == 0 {
 		return port, NoExposedPorts{container}
@@ -100,14 +112,15 @@ func ContainerFromApiContainer(apiContainer docker.APIContainers, projects *Proj
 	}
 
 	project := projects.GetOrCreate(apiContainer.Labels["com.docker.compose.project"])
+	serviceName := apiContainer.Labels["com.docker.compose.service"]
 	commonContainer = Container{
 		ID:              apiContainer.ID,
 		Name:            apiContainer.Names[0][1:],
 		Ports:           make([]*Port, len(apiContainer.Ports)),
 		Project:         project,
-		Service:         apiContainer.Labels["com.docker.compose.service"],
+		Service:         serviceName,
 		ContainerNumber: apiContainer.Labels["com.docker.compose.container-number"],
-		IsMain:          mainLabelPresent,
+		IsMain:          mainLabelPresent || "app" == serviceName,
 	}
 
 	for i, port := range apiContainer.Ports {

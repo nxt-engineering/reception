@@ -35,9 +35,21 @@ func (p Project) Url() (from, to string, err error) {
 	}
 
 	to = fmt.Sprintf("%v:%v", port.LocalAddress, port.LocalPort)
-	from = fmt.Sprintf("%v.%v.%v", port.PrivatePort, mainContainer.Service, mainContainer.Project.Name)
+	from = fmt.Sprintf("%v", mainContainer.Project.Name)
 
-	return
+	return from, to, nil
+}
+
+// Returns the local URL
+func (p Project) LocalUrl() (from string, err error) {
+	from, _, err = p.Url()
+	return from, nil
+}
+
+// true if there is a local url for this project
+// i.e. there is a MainContainer and it exposes a port
+func (p Project) HasUrl() bool {
+	return p.MainContainer().HasExposedTCPPorts()
 }
 
 // Returns any URL that this project or it's container expose
