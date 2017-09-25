@@ -106,6 +106,7 @@ func (handler BackendHandler) lookupAndSetDestinationUrl(backendRequest, fronten
 	frontendHost := removeTLD(frontendHostWithTLD, handler.Config.TLD)
 
 	hostMapping := handler.Config.Projects.AllUrls()
+	//fmt.Printf("hostMapping: %v\n", hostMapping)
 
 	destinationHost, ok := hostMapping[frontendHost]
 	if !ok {

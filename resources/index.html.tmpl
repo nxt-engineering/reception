@@ -16,9 +16,8 @@
 .navbar {
   background-color: #66717E;
 }
-.btn {
-  margin-top: 0.1em;
-  margin-bottom: 0.1em;
+.btn-group {
+  margin: 0.1em;
 }
 </style>
 
@@ -49,7 +48,7 @@
   <div class="row">
     {{ $tld := .TLD }}
     {{ range .Projects }}
-      <div class="col-sm-4">
+      <div class="col-sm-6">
         <div class="card">
           {{ if .HasUrl }}
             {{ $projectFrom := .LocalUrl }}
@@ -70,13 +69,29 @@
                 {{ if .HasExposedTCPPorts }}
                   {{ $containerFrom := .MainLocalUrl }}
                   {{ if .IsMain }}
-                    <a href="http://{{ $containerFrom }}.{{ $tld }}" target="_blank" class="btn btn-primary">
-                      {{ .Service }}
-                    </a>
+                    <div class="btn-group">
+                      <a href="http://{{ $containerFrom }}.{{ $tld }}" class="btn btn-primary">{{ .Service }}</a>
+                      <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                      </button>
+                      <div class="dropdown-menu">
+                        {{ range $from, $to := .Urls }}
+                          <a class="dropdown-item" href="http://{{ $from }}.{{ $tld }}">{{ $from }}</a>
+                        {{ end }}
+                      </div>
+                    </div>
                   {{ else }}
-                    <a href="http://{{ $containerFrom }}.{{ $tld }}" target="_blank" class="btn btn-secondary">
-                      {{ .Service }}
-                    </a>
+                    <div class="btn-group">
+                      <a href="http://{{ $containerFrom }}.{{ $tld }}" class="btn btn-secondary">{{ .Service }}</a>
+                      <a type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                      </a>
+                      <div class="dropdown-menu">
+                        {{ range $from, $to := .Urls }}
+                          <a class="dropdown-item" href="http://{{ $from }}.{{ $tld }}">{{ $from }}</a>
+                        {{ end }}
+                      </div>
+                    </div>
                   {{ end }}
                 {{ else }}
                   {{ if .IsMain }}

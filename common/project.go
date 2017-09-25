@@ -57,7 +57,7 @@ func (p Project) AllUrls() (urls map[string]string) {
 	urls = p.Containers.AllUrls()
 
 	from, to, err := p.Url()
-	if err != nil {
+	if err == nil {
 		urls[from] = to
 	}
 
