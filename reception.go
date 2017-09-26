@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 
 	net_http "net/http"
@@ -12,24 +13,45 @@ import (
 	"github.com/ninech/reception/http"
 )
 
+var config = &common.Config{
+	Projects: common.NewProjects(),
+}
+
+func init() {
+	flag.StringVar(
+		&config.HTTPBindAddress,
+		"http.address",
+		"localhost:80",
+		"Defines on which address and port the HTTP daemon listens.")
+	flag.StringVar(
+		&config.DNSBindAddress,
+		"dns.address",
+		"localhost:53",
+		"Defines on which address and port the HTTP daemon listens.")
+	flag.StringVar(
+		&config.TLD,
+		"tld",
+		"docker.",
+		"Defines on which TLD to react for HTTP and DNS requests. Should end with a \".\" .")
+	flag.StringVar(
+		&config.DockerEndpoint,
+		"docker.endpoint",
+		"unix:///var/run/docker.sock",
+		"How reception talks to Docker.")
+}
+
 func main() {
 	fmt.Println("(c) 2017 Nine Internet Solutions AG")
 
-	config := &common.Config{
-		HTTPBindAddress: "localhost:80",
-		DNSBindAddress:  "localhost:53",
-		TLD:             "docker.",
-		Projects:        common.NewProjects(),
-		DockerEndpoint:  "unix:///var/run/docker.sock",
-	}
+	flag.Parse()
 
-	go runHttpFrontend(config)
-	go runDns(config)
+	go runHttpFrontend()
+	go runDns()
 
-	runDockerClient(config)
+	runDockerClient()
 }
 
-func runDns(config *common.Config) {
+func runDns() {
 	handler := dns.Handler{
 		Config: config,
 	}
@@ -51,7 +73,7 @@ func runDns(config *common.Config) {
 	}
 }
 
-func runDockerClient(config *common.Config) {
+func runDockerClient() {
 	client := docker.Client{
 		Config: config,
 	}
@@ -61,7 +83,7 @@ func runDockerClient(config *common.Config) {
 	}
 }
 
-func runHttpFrontend(config *common.Config) {
+func runHttpFrontend() {
 	frontend := &net_http.Server{
 		Addr: config.HTTPBindAddress,
 		Handler: http.BackendHandler{

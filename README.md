@@ -60,6 +60,22 @@ Now try to go to http://reception.docker.
 
 ¯\_(ツ)_/¯
 
+## Configuration
+
+_reception_ is customizable to some extend. See `reception -h` for a complete list of configuration parameters.
+
+    $ reception -h
+    (c) 2017 Nine Internet Solutions AG
+    Usage of reception:
+      -dns.address string
+        	Defines on which address and port the HTTP daemon listens. (default "localhost:53")
+      -docker.endpoint string
+        	How reception talks to Docker. (default "unix:///var/run/docker.sock")
+      -http.address string
+        	Defines on which address and port the HTTP daemon listens. (default "localhost:80")
+      -tld string
+        	Defines on which TLD to react for HTTP and DNS requests. Should end with a "." . (default "docker.")
+
 ## Tips & Tricks
 
 ### "Main" container
