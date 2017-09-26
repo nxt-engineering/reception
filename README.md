@@ -1,29 +1,29 @@
 # Reception
 
 A dashboard and reverse proxy for your
-[**docker-compose**](https://docs.docker.com/compose/) projects. It does not require any dependencies but _Docker_.
+[docker-compose](https://docs.docker.com/compose/) projects. It does not require any dependencies but _Docker_ and _docker-compose_.
 
 ![screenshot](https://user-images.githubusercontent.com/804532/30865946-41f08066-a2d8-11e7-86d1-fbe28a418c71.png)
 
 ## About
 
 This program shows all _docker-compose_ projects that are running on a handy overview page.
-It has a built-in reverse-proxy, so that any container's exposed port are accessible as '_http://container.composeproject.docker_'.
+It has a built-in reverse-proxy, so that any container's exposed port are accessible as '_container.compose-project.docker_'.
 In order to be able to resolve '_anything_.docker' to *localhost*, this tool also ships a tiny tiny DNS server.
 
-As a result, you'll be able to access your _docker-compose_ projects as *container.compose-project.docker*,
+As a result, you'll be able to access your _docker-compose_ projects as '*container.compose-project.docker*',
 and the traffic will automatically be forwarded to the corresponding port,
 even as you fire up and shut down new _docker-compose_ projects.
 
 ## Installation
 
-For resolving `*.docker` to `localhost` (i.e. `127.0.0.1` or `::1`), changes to your local configuration are required.
+We assume you have _Docker_ and _docker-compose_ already installed.
 
-Btw, we assume you have _Docker_ and _docker-compose_ already installed.
+But for resolving `*.docker` to `localhost` (i.e. `127.0.0.1` or `::1`), changes to your host configuration are required.
 
 ### Linux
 
-Fetch and build reception:
+Fetch and build *reception*:
 
     go get github.com/ninech/reception
 
@@ -44,6 +44,7 @@ Try to go to http://reception.docker.
 
 Install *reception* using [homebrew](https://brew.sh/):
 
+    brew tab ninech/homebrew-reception
     brew install ninech/reception/reception
 
 Next you need to register *reception* as the resolver for the `docker` TLD. Run the
@@ -79,6 +80,9 @@ _reception_ is customizable to some extend. See `reception -h` for a complete li
         	Defines on which address and port the HTTP daemon listens. (default "localhost:80")
       -tld string
         	Defines on which TLD to react for HTTP and DNS requests. Should end with a "." . (default "docker.")
+      -v	Show version.
+      -version
+        	Show version.
 
 ## Tips & Tricks
 
@@ -98,7 +102,7 @@ The container should either have a docker-compose label of `reception.main` or s
 
 ### Ports
 
-In your `docker-compose.yaml` file, we advice to not specific a local port and to not export any
+In your `docker-compose.yaml` file, we advice to not specify a local port and to not export any
 unnecessary ports either. _docker-compose_ will bind your exported port to any available local port,
 and _reception_ will make sure, that there's a url for it.
 
@@ -127,15 +131,15 @@ avoid port collisions across projects.
         volume:
           - ./php:/usr/share/nginx/html
         ports:
-          - 80:80    <----- and _not_ like this
+          - 80:80    <----- and _not_ like this (local port)
       pgsql:
         image: postgresql
         ports:
-          - 5432:5432    <----- and _not_ like this
+          - 5432:5432    <----- and _not_ like this (unnecessary port)
 
 ### HTTP Port
 
-In order to detect which port "the http port" of you container is, _reception_ looks for the well-known ports
+In order to detect which port "the http port" of you container is, *reception* looks for the well-known ports
 80, 8080 and 3000. You can override this behaviour by setting the label `reception.http-port` to a port of your choice:
 
     version: '2'
@@ -151,7 +155,7 @@ In order to detect which port "the http port" of you container is, _reception_ l
 
 ### Reception can't bind to the ports
 
-You must run reception as privileged user (i.e. `root`) for it to be able to bind to port 53 (dns) and port 80 (http). 
+You must run *reception* as privileged user (i.e. `root`) for it to be able to bind to port 53 (dns) and port 80 (http). 
 
 ### _docker-compose_ projects can't start because of port conflicts
 
@@ -169,7 +173,7 @@ In the case above, you would just replace `"80:80"` with `80`.
 
 ### Is the DNS cache outdated?
 
-**Note:** _reception_ must be running at this stage already!
+**Note:** *reception* must be running at this stage already!
 
 `nslookup foobar.docker` should resolve to `127.0.0.1` or `::1`.
 
