@@ -36,12 +36,14 @@ clean:
 
 run: ; $(GORUN) reception.go
 
-build: ; $(GOBUILD) ${LDFLAGS} -o ${BINARY_NAME} reception.go
+build:
+	$(GOGET)
+	$(GOBUILD) ${LDFLAGS} -o ${BINARY_NAME} reception.go
 
 # cut a release
 release: tag clean dist
 	echo ""
-	echo Don't forget to create a new release on Github!
+	echo "Don't forget to create a new release on Github!"
 	echo ""
 
 # build all variants

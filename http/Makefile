@@ -1,6 +1,11 @@
-.PHONY: all clean build release
+.PHONY: all clean build release get_rice
 
-all build: rice-box.go
+# To see output, run "make <target> VERBOSE=1"
+ifndef VERBOSE
+.SILENT:
+endif
+
+all build: get_rice rice-box.go
 dist release: clean build
 
 clean:
@@ -8,3 +13,7 @@ clean:
 
 rice-box.go:
 	rice embed-go
+
+get_rice:
+	go get github.com/GeertJohan/go.rice
+	go get github.com/GeertJohan/go.rice/rice
