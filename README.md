@@ -187,7 +187,7 @@ systemctl restart nscd
 
 ## Development
 
-There is a `Makefile`.
+There is a `Makefile` with targets for any common task.
 
 ### Build
 
@@ -209,9 +209,19 @@ To cut a release of the project, run:
     
 ### Debug the Makefile
 
-To see the commands executed by make, run make as follows:
+To see the commands executed by `make`, run `make` as follows:
 
     make <target> VERBOSE=1
+    
+To run `make` without having it execute any command, run `make` as follows:
+
+    make -n <target>
+
+### Clean
+
+To cleanup afterwards, run:
+
+    make clean
 
 ## License
 

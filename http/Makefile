@@ -1,9 +1,10 @@
-all: rice-box.go
+.PHONY: all clean build release
 
-.PHONY: clean
-
-rice-box.go:
-	rice embed-go
+all build: rice-box.go
+dist release: clean build
 
 clean:
 	rice clean
+
+rice-box.go:
+	rice embed-go

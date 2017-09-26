@@ -19,3 +19,6 @@ reception
 
 # Rice Boxes
 **/rice-box.go
+
+# dist dir
+dist/
