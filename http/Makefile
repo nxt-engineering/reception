@@ -1,3 +1,4 @@
+.NOTPARALLEL:
 .PHONY: all clean build release get_rice
 
 # To see output, run "make <target> VERBOSE=1"
