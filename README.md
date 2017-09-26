@@ -44,7 +44,7 @@ Try to go to http://reception.docker.
 
 Install *reception* using [homebrew](https://brew.sh/):
 
-    brew tab ninech/homebrew-reception
+    brew tap ninech/homebrew-reception
     brew install ninech/reception/reception
 
 Next you need to register *reception* as the resolver for the `docker` TLD. Run the
