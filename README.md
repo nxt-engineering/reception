@@ -185,6 +185,34 @@ systemctl restart named
 systemctl restart nscd
 ```
 
+## Development
+
+There is a `Makefile`.
+
+### Build
+
+To build the project, run:
+
+    make
+
+### Run
+
+To run a snapshot of the project, run:
+
+    make run
+
+### Release
+
+To cut a release of the project, run:
+
+    make release VERSION=2.3.4
+    
+### Debug the Makefile
+
+To see the commands executed by make, run make as follows:
+
+    make <target> VERBOSE=1
+
 ## License
 
 This program is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
