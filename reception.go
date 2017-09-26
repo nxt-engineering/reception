@@ -6,6 +6,8 @@ import (
 
 	net_http "net/http"
 
+	"runtime"
+
 	miekg_dns "github.com/miekg/dns"
 	"github.com/ninech/reception/common"
 	"github.com/ninech/reception/dns"
@@ -16,6 +18,14 @@ import (
 var config = &common.Config{
 	Projects: common.NewProjects(),
 }
+
+var (
+	Tag         string = "SNAPSHOT"
+	BuildDate   string
+	Commit      string
+	Branch      string
+	ShowVersion bool
+)
 
 func init() {
 	flag.StringVar(
@@ -38,12 +48,23 @@ func init() {
 		"docker.endpoint",
 		"unix:///var/run/docker.sock",
 		"How reception talks to Docker.")
+	BoolFlag(&ShowVersion, "version", false, "Show version.")
+}
+
+func BoolFlag(p *bool, name string, value bool, usage string) {
+	flag.BoolVar(p, name, value, usage)
+	flag.BoolVar(p, name[:1], value, usage)
 }
 
 func main() {
 	fmt.Println("(c) 2017 Nine Internet Solutions AG")
 
 	flag.Parse()
+
+	if ShowVersion {
+		showVersionInfo()
+		return
+	}
 
 	go runHttpFrontend()
 	go runDns()
@@ -99,4 +120,12 @@ func runHttpFrontend() {
 	} else {
 		defer frontend.Close()
 	}
+}
+
+func showVersionInfo() {
+	fmt.Println("Version:    ", Tag)
+	fmt.Println("Build Date: ", BuildDate)
+	fmt.Println("Commit:     ", Commit)
+	fmt.Println("Branch:     ", Branch)
+	fmt.Println("Go Version: ", runtime.Version())
 }
