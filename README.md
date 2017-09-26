@@ -23,6 +23,10 @@ Btw, we assume you have _Docker_ and _docker-compose_ already installed.
 
 ### Linux
 
+Fetch and build reception:
+
+    go get github.com/ninech/reception
+
 Make sure that *reception* is responsible for resolving the `.docker` TLD:
 
     sudo -s
