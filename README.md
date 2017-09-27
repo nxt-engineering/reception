@@ -128,8 +128,6 @@ avoid port collisions across projects.
       app:
         image: nginx
         depends_on: pgsql
-        volume:
-          - ./php:/usr/share/nginx/html
         ports:
           - 80:80    <----- and _not_ like this (local port)
       pgsql:
@@ -139,7 +137,7 @@ avoid port collisions across projects.
 
 ### HTTP Port
 
-In order to detect which port "the http port" of you container is, *reception* looks for the well-known ports
+In order to detect which port of you container "the http port" is, *reception* looks for the well-known ports
 80, 8080 and 3000. You can override this behaviour by setting the label `reception.http-port` to a port of your choice:
 
     version: '2'
@@ -155,7 +153,7 @@ In order to detect which port "the http port" of you container is, *reception* l
 
 ### Reception can't bind to the ports
 
-You must run *reception* as privileged user (i.e. `root`) for it to be able to bind to port 53 (dns) and port 80 (http). 
+You must run *reception* as privileged user (i.e. `root`) for it to be able to bind to port 53 (dns) and port 80 (http).
 
 ### _docker-compose_ projects can't start because of port conflicts
 
@@ -166,16 +164,16 @@ version: 2
 services:
   app:
     ports:
-      -- "80:80"
+      - "80:80"
 ```
 
 In the case above, you would just replace `"80:80"` with `80`.
 
-### Is the DNS cache outdated?
+### `reception.docker` does not resolve
 
-**Note:** *reception* must be running at this stage already!
+First, check if *reception* is actually running.
 
-`nslookup foobar.docker` should resolve to `127.0.0.1` or `::1`.
+Then see if `nslookup reception.docker` resolves to `127.0.0.1` or `::1`.
 
 If it doesn't, please flush the DNS cache:
 
