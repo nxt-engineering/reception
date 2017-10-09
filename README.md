@@ -231,8 +231,6 @@ This program is available as open source under the terms of the [MIT License](ht
 
 ## About
 
-This piece of software is currently maintained and funded by [nine.ch](https://nine.ch).
+This piece of software is currently maintained and funded by [nine](https://nine.ch).
 
-[![nine.ch Logo](https://blog.nine.ch/assets/logo.png)](https://nine.ch)
-
-We run your Linux server infrastructure – without interruptions, around the clock.
+[![logo of the company 'nine'](https://logo.apps.at-nine.ch/Dmqied_eSaoBMQwk3vVgn4UIgDo=/trim/500x0/logo_claim.png)](https://www.nine.ch)
