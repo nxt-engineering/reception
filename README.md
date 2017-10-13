@@ -96,7 +96,7 @@ The container should either have a docker-compose label of `reception.main` or s
       app:    <----- like this
         image: nginx
         labels:
-          reception.main: true  <--- or like this
+          reception.main: 'true'  <--- or like this
         ports:
           - 80
 
