@@ -145,7 +145,7 @@ In order to detect which port of you container "the http port" is, *reception* l
       app:
         image: special
         labels:
-          reception.http-port: 1234  <--- like this
+          reception.http-port: '1234'  <--- like this
         ports:
           - 1234
 
