@@ -15,6 +15,10 @@ As a result, you'll be able to access your _docker-compose_ projects as '*contai
 and the traffic will automatically be forwarded to the corresponding port,
 even as you fire up and shut down new _docker-compose_ projects.
 
+## Requirements
+
+We depend on at least Go 1.9. Also you need to have superuser privileges on your computer.
+
 ## Installation
 
 We assume you have _Docker_ and _docker-compose_ already installed.
@@ -63,7 +67,7 @@ Now try to go to http://reception.docker.
 
 ### Windows
 
-¯\_(ツ)_/¯
+🤷
 
 ## Configuration
 
