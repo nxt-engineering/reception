@@ -6,7 +6,7 @@ ifndef VERBOSE
 .SILENT:
 endif
 
-all build: get_rice rice-box.go
+all build: clean get_rice rice-box.go
 dist release: clean build
 
 clean:

@@ -1,3 +1,4 @@
+VERSION := `cat VERSION`
 COMMIT  := `git show -s --format=%h`
 DATE    := `date -u +%FT%T%z`
 TAG     := `git describe --abbrev=0 --tags 2>/dev/null || echo "0.0.0"`
@@ -25,9 +26,27 @@ ifndef VERBOSE
 .SILENT:
 endif
 
-.PHONY: clean run release tag build dist $(SUBDIRS) get-windows-dependencies
+.PHONY: clean run release tag build dist $(SUBDIRS) get-windows-dependencies install uninstall as_root
 
 all: build
+
+as_root:
+	test "$$(id -u)" -eq "0" || ( echo "Please run 'make $(MAKECMDGOALS)' as root."; return 1 )
+
+install: as_root
+	systemctl stop reception || true
+	cp reception /usr/bin/
+	cp contrib/reception.service /etc/systemd/system/
+	systemctl daemon-reload
+	systemctl enable reception
+	systemctl restart reception
+
+uninstall: as_root
+	systemctl stop reception || true
+	systemctl disable reception || true
+	rm /usr/bin/reception || true
+	rm /etc/systemd/system/reception.service || true
+	systemctl daemon-reload
 
 # remove the mess created by make
 clean:
@@ -85,8 +104,6 @@ $(DIST_DIR)${BINARY_NAME}_mac_x64:
 $(SUBDIRTARGETS): $(SUBDIRS)
 $(SUBDIRS): ; $(MAKE) -C $@ $(MAKECMDGOALS)
 
-# only perform a release if a VERSION is defined
-ifdef VERSION
 tag:
 	# only tag on master branch!
 	$(BRANCH) | grep -e "^master$$" > /dev/null \
@@ -100,7 +117,3 @@ tag:
 	echo ""
 	echo "Don't forget to push the new tag!"
 	echo ""
-else
-tag:
-	$(error You have not defined a VERSION. Run "make $(MAKECMDGOALS) VERSION=1.2.3" to set a version)
-endif

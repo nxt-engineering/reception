@@ -46,7 +46,6 @@ func (client *Client) Launch() error {
 			return err
 		}
 	}
-	return nil
 }
 
 // handles an event emitted by Docker
