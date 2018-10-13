@@ -1,4 +1,4 @@
-VERSION := `cat VERSION`
+VERSION := `cat VERSION | tr -d '\n'`
 COMMIT  := `git show -s --format=%h`
 DATE    := `date -u +%FT%T%z`
 TAG     := `git describe --abbrev=0 --tags 2>/dev/null || echo "0.0.0"`
