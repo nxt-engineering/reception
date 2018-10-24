@@ -3,9 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-
 	net_http "net/http"
-
 	"runtime"
 
 	miekg_dns "github.com/miekg/dns"
@@ -57,7 +55,7 @@ func BoolFlag(p *bool, name string, value bool, usage string) {
 }
 
 func main() {
-	fmt.Println("(c) 2017 Nine Internet Solutions AG")
+	fmt.Println("(c) 2017-2018 Nine Internet Solutions AG")
 
 	flag.Parse()
 
