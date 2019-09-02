@@ -237,7 +237,7 @@ systemctl restart nscd
 
 ## Development
 
-We depend on at least Go 1.11.
+This projects requires Go 1.11 or newer.
 
 There is a `Makefile` with targets for any common task.
 

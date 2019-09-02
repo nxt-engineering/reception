@@ -3,14 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	net_http "net/http"
-	"runtime"
-
+	"github.com/cenkalti/backoff"
 	miekg_dns "github.com/miekg/dns"
 	"github.com/ninech/reception/common"
 	"github.com/ninech/reception/dns"
 	"github.com/ninech/reception/docker"
 	"github.com/ninech/reception/http"
+	net_http "net/http"
+	"runtime"
 )
 
 var config = &common.Config{
@@ -56,6 +56,7 @@ func BoolFlag(p *bool, name string, value bool, usage string) {
 
 func main() {
 	fmt.Println("(c) 2017-2018 Nine Internet Solutions AG")
+	fmt.Println("(c) 2018-2019 nxt Engineering GmbH")
 
 	flag.Parse()
 
@@ -67,7 +68,10 @@ func main() {
 	go runHttpFrontend()
 	go runDns()
 
-	runDockerClient()
+	err := backoff.Retry(runDockerClient, backoff.NewExponentialBackOff())
+	if err != nil {
+		panic(err)
+	}
 }
 
 func runDns() {
@@ -92,14 +96,11 @@ func runDns() {
 	}
 }
 
-func runDockerClient() {
+func runDockerClient() error {
 	client := docker.Client{
 		Config: config,
 	}
-	err := client.Launch()
-	if err != nil {
-		panic(err)
-	}
+	return client.Launch()
 }
 
 func runHttpFrontend() {

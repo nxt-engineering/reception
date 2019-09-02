@@ -24,7 +24,10 @@ func (client *Client) Launch() error {
 	}
 	client.dockerClient = dockerClient
 
-	client.updateContainers()
+	err = client.updateContainers()
+	if err != nil {
+		return err
+	}
 
 	listener := make(chan *docker.APIEvents)
 	err = dockerClient.AddEventListener(listener)
@@ -50,6 +53,10 @@ func (client *Client) Launch() error {
 
 // handles an event emitted by Docker
 func (client *Client) handleEvent(event *docker.APIEvents) error {
+	if event == nil {
+		return nil
+	}
+
 	if event.Type != "container" {
 		return nil
 	}

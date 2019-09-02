@@ -1,6 +1,7 @@
 package http
 
 import (
+	"github.com/tdewolff/minify/html"
 	"html/template"
 	"io"
 	"net/http"
@@ -12,7 +13,6 @@ import (
 	"github.com/ninech/reception/common"
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
-	"github.com/tdewolff/minify/html"
 	"github.com/tdewolff/minify/js"
 
 	"github.com/GeertJohan/go.rice"
