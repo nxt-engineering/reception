@@ -29,8 +29,10 @@ But for resolving `*.docker` to `localhost` (i.e. `127.0.0.1` or `::1`), changes
 
 Install *reception*:
 
-    git clone https://github.com/ninech/reception.git
-    make
+```bash
+git clone https://github.com/nxt-engineering/reception.git
+make
+```
 
 Proceed according to your linux configuration:
 
@@ -40,11 +42,15 @@ Instead of `.docker` as TLD it's the easiest to just use `.localhost` because th
 
 Now run *reception*:
 
-    sudo reception -tld localhost
+```bash
+sudo reception -tld localhost
+```
 
 Or install *reception* as systemd service:
 
-    sudo make install
+```
+sudo make install
+```
 
 Now try to go to http://reception.localhost.
 
@@ -57,11 +63,15 @@ If you use dnsmasq as your local resolver, add this line to your dnsmasq config:
 It tells dnsmasq to resolve `*.docker` with the dnsserver listening at `127.0.0.1:53` (which will be *reception*).
 Then restart dnsmasq:
 
-    service dnsmasq restart
+```bash
+service dnsmasq restart
+```
 
 And now run *reception*:
 
-    sudo reception
+```bash
+sudo reception
+```
 
 You should be able to http://reception.docker now.
 
@@ -70,14 +80,18 @@ You should be able to http://reception.docker now.
 Check the content of `/etc/hosts`.
 If it doesn't contain any nameservers pointing to `127.0.0.1`, `127.0.0.53` or `::1`, then this way of installation should work for you:
 
-    sudo -i
-    mkdir /etc/resolver
-    echo "nameserver ::1" > /etc/resolver/docker
-    echo "nameserver 127.0.0.1" >> /etc/resolver/docker
+```bash
+sudo -i
+mkdir /etc/resolver
+echo "nameserver ::1" > /etc/resolver/docker
+echo "nameserver 127.0.0.1" >> /etc/resolver/docker
+```
 
 Now run *reception*:
 
-    sudo reception
+```bash
+sudo reception
+```
 
 Finally, try to go to http://reception.docker.
 
@@ -85,20 +99,26 @@ Finally, try to go to http://reception.docker.
 
 Install *reception* using [homebrew](https://brew.sh/):
 
-    brew tap ninech/reception
-    brew install ninech/reception/reception
+```bash
+brew tap nxt-engineering/reception
+brew install nxt-engineering/reception/reception
+```
 
 Next you need to register *reception* as the resolver for the `docker` TLD. Run the
 following on your command-line
 
-    sudo -s
-    mkdir /etc/resolver
-    echo "nameserver ::1" > /etc/resolver/docker
-    echo "nameserver 127.0.0.1" >> /etc/resolver/docker
+```bash
+sudo -s
+mkdir /etc/resolver
+echo "nameserver ::1" > /etc/resolver/docker
+echo "nameserver 127.0.0.1" >> /etc/resolver/docker
+```
 
 At last, start the service:
 
-    sudo brew services start ninech/reception/reception
+```bash
+sudo brew services start nxt-engineering/reception/reception
+```
 
 Now try to go to http://reception.docker.
 
@@ -111,20 +131,23 @@ Now try to go to http://reception.docker.
 _reception_ is customizable to some extend.
 See `reception -h` for a complete list of configuration parameters.
 
-    $ reception -h
-    (c) 2017 Nine Internet Solutions AG
-    Usage of reception:
-      -dns.address string
-        	Defines on which address and port the HTTP daemon listens. (default "localhost:53")
-      -docker.endpoint string
-        	How reception talks to Docker. (default "unix:///var/run/docker.sock")
-      -http.address string
-        	Defines on which address and port the HTTP daemon listens. (default "localhost:80")
-      -tld string
-        	Defines on which TLD to react for HTTP and DNS requests. Should end with a "." . (default "docker.")
-      -v	Show version.
-      -version
-        	Show version.
+```
+$ ./reception --help                                                       
+(c) 2017-2018 Nine Internet Solutions AG
+(c) 2018-2019 nxt Engineering GmbH
+Usage of ./reception:
+  -dns.address string
+    	Defines on which address and port the HTTP daemon listens. (default "localhost:53")
+  -docker.endpoint string
+    	How reception talks to Docker. (default "unix:///var/run/docker.sock")
+  -http.address string
+    	Defines on which address and port the HTTP daemon listens. (default "localhost:80")
+  -tld string
+    	Defines on which TLD to react for HTTP and DNS requests. Should end with a "." . (default "docker.")
+  -v	Show version.
+  -version
+    	Show version.
+```
 
 ## Tips & Tricks
 
@@ -133,14 +156,16 @@ See `reception -h` for a complete list of configuration parameters.
 The "main" container defines, where the project address ends up (i.e. http://yourproject.docker):
 The container should either have a docker-compose label of `reception.main` or should be called `app`:
 
-    version: '2'
-    services:
-      app:    <----- like this
-        image: nginx
-        labels:
-          reception.main: 'true'  <--- or like this
-        ports:
-          - 80
+```yml
+version: '2'
+services:
+  app:    <----- like this
+    image: nginx
+    labels:
+      reception.main: 'true'  <--- or like this
+    ports:
+      - 80
+```
 
 ### Ports
 
@@ -247,35 +272,47 @@ There is a `Makefile` with targets for any common task.
 
 To build the project, run:
 
-    make
+```bash
+make
+```
 
 ### Run
 
 To run a snapshot of the project, run:
 
-    make run
+```bash
+make run
+```
 
 ### Release
 
 To cut a release of the project, adjust the `VERSION` file and run:
 
-    make release
-    
+```bash
+make release
+```
+
 ### Debug the Makefile
 
 To see the commands executed by `make`, run `make` as follows:
 
-    make <target> VERBOSE=1
-    
+```bash
+make <target> VERBOSE=1
+```
+
 To run `make` without having it execute any command, run `make` as follows:
 
-    make -n <target>
+```bash
+make -n <target>
+```
 
 ### Clean
 
 To cleanup afterwards, run:
 
-    make clean
+```bash
+make clean
+```
 
 ## License
 
