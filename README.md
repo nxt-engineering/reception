@@ -3,7 +3,7 @@
 A dashboard and reverse proxy for your
 [docker-compose](https://docs.docker.com/compose/) projects. It does not require any dependencies but _Docker_ and _docker-compose_.
 
-![screenshot](https://user-images.githubusercontent.com/804532/30865946-41f08066-a2d8-11e7-86d1-fbe28a418c71.png)
+![screenshot](https://user-images.githubusercontent.com/804532/64123409-933ba100-cda4-11e9-9705-79dda6eb5115.png)
 
 ## About
 
