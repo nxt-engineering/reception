@@ -78,8 +78,7 @@ $(DISTS): dist-dir
 
 # windows builds
 get-windows-dependencies:
-	go get github.com/Microsoft/go-winio
-	go get golang.org/x/sys/windows
+	GOOS=windows go get github.com/Microsoft/go-winio golang.org/x/sys/windows
 
 $(DIST_DIR)${BINARY_NAME}_windows_x86.exe: get-windows-dependencies
 	GOOS=windows GOARCH=386 GO386=sse2 $(GOBUILD) ${LDFLAGS} -o $@ reception.go
